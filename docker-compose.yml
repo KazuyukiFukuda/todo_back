@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  back:
+    build: ./
+    volumes:
+      - ".:/ToDoapp_rails"
+      - node_modules:/myapp/node_modules
+      - bundle:/usr/local/bundle
+    tty: true
+    ports:
+      - "3000:3000"
+    environment:
+      - "DATABASE_PASSWORD=password"
+    depends_on:
+      - db
+    networks:
+      - backToDB
+
+  db:
+    platform: linux/x86_64
+    image: mysql:5.7
+    environment:
+      TZ: Asia/Tokyo
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - ${MYSQL_PORT:-3306}:3306
+    volumes:
+      - "mysql-data:/var/lib/mysql"
+    tty: true
+    networks:
+      - backToDB
+
+networks:
+  backToDB:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  node_modules:
+  bundle:
