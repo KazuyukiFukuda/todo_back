@@ -26,33 +26,43 @@ RSpec.describe User, type: :model do
       end
 
       it "is invalid without password" do
-        user = FactoryBot.build(:user, password_digest: nil)
+        user = FactoryBot.build(:user, password: nil)
         user.valid?
-        expect(user.errors[:password_digest]).to include("can't be blank")
+        expect(user.errors[:password]).to include("can't be blank")
+      end
+
+      it "is invalid when password and password confirmation are not same" do
+        user = FactoryBot.build(:user, password: "KdfgYd123fa", password_confirmation: "KdfgYd123ea")
+        user.valid?
+        expect(user.errors[:password_confirmation]).to include("doesn't match Password")
       end
 
       it "is invalid with password shorter than 8" do
-        user = FactoryBot.build(:user, password_digest: "hogehog")
+        user = FactoryBot.build(:user, password: "hogehog", password_confirmation: "hogehog")
         user.valid?
-        expect(user.errors[:password_digest]).to include("can't be shorter than 8")
+        expect(user.errors[:password]).to include("is too short (minimum is 8 characters)")
+        #expect(user).to_not be_valid  
       end
 
-      it "is invalid with passwor that does'nt include large character" do
-        user = FactoryBot.build(:user, password_digest: "dfgyd123fa")
+      it "is invalid with password that does'nt include large character" do
+        user = FactoryBot.build(:user, password: "dfgyd123fa", password_confirmation: "dfgyd123fa")
         user.valid?
-        expect(user.errors[:password_digest]).to include("invalid password")
+        expect(user.errors[:password]).to include("is invalid")
+        #expect(user).to_not be_valid  
       end
 
-      it "is invalid with passwor that does'nt include small character" do
-        user = FactoryBot.build(:user, password_digest: "ADF1ADf23ADS")
+      it "is invalid with password that does'nt include small character" do
+        user = FactoryBot.build(:user, password: "ADF1AD23ADS", password_confirmation: "ADF1AD23ADS")
         user.valid?
-        expect(user.errors[:password_digest]).to include("invalid password")
+        expect(user.errors[:password]).to include("is invalid")
+        #expect(user).to_not be_valid  
       end
 
-      it "is invalid with passwor that does'nt include number" do
-        user = FactoryBot.build(:user, password_digest: "ASDgadfgEWAR")
+      it "is invalid with password that does'nt include number" do
+        user = FactoryBot.build(:user, password: "ASDgadfgEWAR", password_confirmation: "ASDgadfgEWAR")
         user.valid?
-        expect(user.errors[:password_digest]).to include("invalid password")
+        expect(user.errors[:password]).to include("is invalid")
+        #expect(user).to_not be_valid  
       end
 
     end
