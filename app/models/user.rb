@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+    has_many :tasks, foreign_key: "user_id", primary_key: "id"
+    has_many :tasks, foreign_key: "assignee_id", primary_key: "id"
+    
     before_save {self.email = email.downcase}
     VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
     validates :email, presence: true, length: {maximum:255},
