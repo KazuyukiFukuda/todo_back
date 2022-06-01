@@ -25,7 +25,5 @@ RSpec.describe Subtask, type: :model do
         
       end
     end
-    
   end
-  
 end
