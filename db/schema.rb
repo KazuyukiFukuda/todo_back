@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_06_01_081553) do
+
+ActiveRecord::Schema[7.0].define(version: 2022_06_01_084739) do
   create_table "subtasks", charset: "utf8mb4", force: :cascade do |t|
     t.bigint "task_id", null: false
     t.string "description"
@@ -22,11 +23,11 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_01_081553) do
 
   create_table "tasks", charset: "utf8mb4", force: :cascade do |t|
     t.string "name"
-    t.text "description", null: false
-    t.date "deadline", null: false
+    t.text "description"
+    t.date "deadline"
     t.boolean "completed"
     t.integer "user_id"
-    t.integer "assignee_id", null: false
+    t.integer "assignee_id"
     t.boolean "public"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
