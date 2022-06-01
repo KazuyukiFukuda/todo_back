@@ -10,6 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+
 ActiveRecord::Schema[7.0].define(version: 2022_06_01_084739) do
   create_table "subtasks", charset: "utf8mb4", force: :cascade do |t|
     t.bigint "task_id", null: false
