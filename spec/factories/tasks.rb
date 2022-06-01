@@ -1,11 +1,15 @@
 FactoryBot.define do
   factory :task do
-    name { "MyString" }
+    sequence(:name) { |n| "MyString #{n}" }
     description { "MyText" }
-    deadline { "2022-05-31" }
+    deadline { 1.week.from_now }
     completed { false }
-    user_id { 1 }
-    assignee_id { 1 }
     public { false }
+    user_id { nil }
+    assignee_id {nil}
+
+    trait :deadline_yesterday do
+      deadline { 1.day.ago }
+    end
   end
 end
