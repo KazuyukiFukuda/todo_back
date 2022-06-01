@@ -22,8 +22,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_01_084739) do
 
   create_table "tasks", charset: "utf8mb4", force: :cascade do |t|
     t.string "name"
-    t.text "description"
-    t.date "deadline"
+    t.text "description", null: false
+    t.date "deadline", null: false
     t.boolean "completed"
     t.integer "user_id"
     t.integer "assignee_id"
