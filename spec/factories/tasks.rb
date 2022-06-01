@@ -5,8 +5,8 @@ FactoryBot.define do
     deadline { 1.week.from_now }
     completed { false }
     public { false }
-    user_id { nil }
-    assignee_id {nil}
+    association :user
+    association :assignee, factory: :user
 
     trait :deadline_yesterday do
       deadline { 1.day.ago }
