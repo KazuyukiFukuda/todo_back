@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :subtask do
-    task_id { nil }
+    association :task
     description { "MyString" }
     completed { false }
   end
