@@ -1,10 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe Subtask, type: :model do
-  let(:user1) {FactoryBot.create(:user)}
-  let(:user2) {FactoryBot.create(:user)}
-  let(:task1) {FactoryBot.create(:task, user_id: user1.id, assignee_id: user2.id)}
-
   it "belongs to task" do
     belong_to(:task_id).class_name(Task)
   end
@@ -12,17 +8,23 @@ RSpec.describe Subtask, type: :model do
   describe "validation" do
     context "valid" do
       it "is valid with task id and description, model" do
-        subtask = FactoryBot.build
+        subtask = FactoryBot.create(:subtask)
+        expect(subtask).to be_valid
       end
     end
 
     context "incalid" do
       it "is invalid withoud description" do
-
+        subtask = FactoryBot.build(:subtask, description: nil)
+        subtask.valid?
+        expect(subtask.errors[:description]).to include("can't be blank")
+        #expect(subtask).to_not be_valid
       end
 
       it "is invalid without mode" do
-        
+        subtask = FactoryBot.build(:subtask, completed: nil)
+        subtask.valid?
+        expect(subtask.errors[:completed]).to include("is not included in the list")
       end
     end
   end
