@@ -6,9 +6,7 @@ class UsersController < ApplicationController
             @user.save
             session[:session_id] = @user.id
             render json: {display_name: @user.display_name}, status: 201
-            logger.debug("success")
         else
-            logger.debug("failed")
             render json: { message:"failed to signup"}, status: 400
 
         end
