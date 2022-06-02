@@ -68,4 +68,66 @@ RSpec.describe "UsersApis", type: :request do
       end
     end
   end
+
+  describe "PATCH /users:id" do
+    before(:each) do
+      @user = FactoryBot.create(:user)
+      sign_in_as(@user.email, @user.password)
+    end
+
+    context "success" do
+      before do
+        @update_user = {
+          display_name: nil,
+          email: Faker::Internet.email,
+          old_password: nil,
+          password: nil,
+          password_confirmation: nil,
+        }
+
+        patch users_path(@user.id), :params => @update_user.to_json, headers: {"Content-Type" => "application/json"}
+      end
+
+      it "returns 200 status" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "update successfuly" do
+        expect( @user.email ).to eq(@update_user[:email])
+      end
+
+      it "doesn't update others" do
+        updated_user = User.find_by(id: @user.id)
+        updated_user_hash = updated_user.attributes
+        user_hash = @user.attributes.slice(:display_name, :password)
+        expect(updated_user_hash).to include(user_hash)
+      end
+    end
+  end
+
+  context "failed" do
+    
+    it "doesn't update password if old_password is wrong" do
+      user_here = FactoryBot.create(:user)
+
+      update_user = {
+        display_name: nil,
+        email: nil,
+        old_password: "agRHASWERTY23345",
+        password: "ETYserSRT2345",
+        password_confirmation: "ETYserSRT2345",
+      }
+
+      patch users_path(user_here.id), :params => update_user.to_json, headers: {"Content-Type" => "application/json"}
+      expect(response).to have_http_status(400)
+    end
+
+    it "doesn't update if user doesn't have authorization" do
+      other_user = FactoryBot.create(:user)
+      user_here2 = FactoryBot.create(:user)
+      patch users_path(other_user.id), :params => user_here2.attributes.to_json, headers: {"Content-Type" => "application/json"}
+
+      expect(response).to have_http_status(401)
+    end
+  end
 end
