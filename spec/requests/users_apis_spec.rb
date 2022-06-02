@@ -50,13 +50,13 @@ RSpec.describe "UsersApis", type: :request do
       end
 
       it "returns all user list" do
-        expect(JSON.parse(response.body).length).to eq(User.count)
+        expect(JSON.load(response.body).length).to eq(User.count)
       end
 
       it "has id and email, display name for each" do
         a_hash = JSON.load(response.body)[0]
-        user = User.find_by(id: a_hash[:id])
-        answer_hash = {id: user.id, email: user.email, display_name: user.display_name}
+        answer_user = User.find_by(id: a_hash["id"])
+        answer_hash = {"id"=> answer_user.id, "email"=> answer_user.email, "display_name"=> answer_user.display_name}
         expect(a_hash).to eq(answer_hash)
       end
     end

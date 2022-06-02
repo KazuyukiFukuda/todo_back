@@ -13,7 +13,16 @@ class UsersController < ApplicationController
     end
 
     def index
-
+        if logged_in?
+            list = User.all
+            all_users = []
+            list.each do |v|
+                all_users.push( {:id => v.id, email: v.email, display_name: v.display_name} )
+            end
+            render json: all_users, status: 200
+        else
+           render json: {message: "loginされていません"}, status: 401
+        end
     end
 
     def update
