@@ -22,11 +22,11 @@ RSpec.describe "Sessions", type: :request do
       end
 
       it "returns error message without email" do
-        sign_in_as(nil, user.password)
+        sign_in_as("", user.password)
       end
 
       it "returns error message without password" do
-        sign_in_as(user.email, nil)
+        sign_in_as(user.email, "")
       end
 
       it "returns error message if email doesn't exist" do
@@ -34,23 +34,24 @@ RSpec.describe "Sessions", type: :request do
       end
 
       it "returns error message if password does't match email" do
-        sign_in_as(user.email, not_saved_user.password)
+        sign_in_as(user.email, Faker::Internet.email)
       end
     end
   end
 
   describe "DELETE /auth" do
     it "log out successfuly" do
-      user = FactoryBot.create(:user)
       sign_in_as(user.email, user.password)
 
-      delete "/auth"
+      delete  '/auth'
       expect(response).to have_http_status(204)
-      expect(session[:session_id]).to eq nil
+      expect(session[:session_id]).to eq("")
     end
 
     it "doesn't logout when not login" do
-      delete "/auth"
+      delete  '/auth'
+      error_session_id = Digest::MD5.hexdigest("4")
+      session[:session_id] = ""
       expect(response).to have_http_status(401)
     end
   end
