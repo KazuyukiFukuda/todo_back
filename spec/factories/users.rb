@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :user, aliases: [:owner] do
-    sequence(:email) { |n| "hogehog#{n}@example.com" }
+    email { Faker::Internet.email }
     password { "KdfgYd123fa" }
     password_confirmation {"KdfgYd123fa"}
-    display_name { "Kazu" }
+    display_name { Faker::JapaneseMedia::DragonBall.character }
   end
 end
