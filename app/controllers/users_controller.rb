@@ -30,7 +30,7 @@ class UsersController < ApplicationController
             @user = User.find(params[:id])
             json_request = JSON.parse(request.body.read)
             @user.update(json_request)
-            render json: {message: json_request}, status: 200
+            render json: {message: @user}, status: 200
         else
             render json: {message: "loginされていません"}, status: 401
         end
