@@ -35,4 +35,37 @@ RSpec.describe "UsersApis", type: :request do
       end
     end
   end
+
+  describe "GET /users" do
+    user = FactoryBot.create(:user)
+
+    context "sucess" do
+      before do
+        sign_in_as(user.email, user.password)
+        get "/users"
+      end
+
+      it "returns 200 status" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns all user list" do
+        expect(JSON.parse(response.body).length).to eq(User.count)
+      end
+
+      it "has id and email, display name for each" do
+        a_hash = JSON.load(response.body)[0]
+        user = User.find_by(id: a_hash[:id])
+        answer_hash = {id: user.id, email: user.email, display_name: user.display_name}
+        expect(a_hash).to eq(answer_hash)
+      end
+    end
+
+    context "fail" do
+      it "can't get without login" do
+        get "/users"
+        expect(response).to have_http_status(401)
+      end
+    end
+  end
 end
