@@ -25,11 +25,13 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_01_084739) do
     t.text "description"
     t.date "deadline"
     t.boolean "completed"
-    t.integer "user_id"
-    t.integer "assignee_id"
+    t.bigint "user_id", null: false
+    t.bigint "assignee_id"
     t.boolean "public"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["assignee_id"], name: "index_tasks_on_assignee_id"
+    t.index ["user_id"], name: "index_tasks_on_user_id"
   end
 
   create_table "users", charset: "utf8mb4", force: :cascade do |t|
@@ -42,4 +44,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_01_084739) do
   end
 
   add_foreign_key "subtasks", "tasks"
+  add_foreign_key "tasks", "users"
+  add_foreign_key "tasks", "users", column: "assignee_id"
 end

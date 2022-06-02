@@ -1,4 +1,5 @@
 
+
 def sign_in_as(email, password)
     post "/auth", params: {
         email: email,

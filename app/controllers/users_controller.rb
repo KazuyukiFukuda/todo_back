@@ -4,7 +4,7 @@ class UsersController < ApplicationController
         @user = User.new(json_request)
         if @user.valid?
             @user.save
-            session[:session_id] = @user.id
+            session[:user_id] = @user.id
             render json: {display_name: @user.display_name}, status: 201
         else
             render json: { message:"failed to signup"}, status: 400
@@ -26,6 +26,14 @@ class UsersController < ApplicationController
     end
 
     def update
+        if logged_in?
+            @user = User.find(params[:id])
+            json_request = JSON.parse(request.body.read)
+            @user.update(json_request)
+            render json: {message: @user}, status: 200
+        else
+            render json: {message: "loginされていません"}, status: 401
+        end
 
     end
 end
