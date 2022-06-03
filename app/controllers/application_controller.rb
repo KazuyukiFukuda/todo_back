@@ -6,14 +6,14 @@ class ApplicationController < ActionController::API
     end
 
     def current_user
-    if session[:user_id]
-        @current_user ||= User.find_by(id: session[:user_id])
-    end
+        if session[:user_id]
+            @current_user ||= User.find_by(id: session[:user_id])
+        end
     end
 
     # ユーザーがログインしていればtrue、その他ならfalseを返す
     def logged_in?
-    !current_user.nil?
+        !current_user.nil?
     end
 
     # 現在のユーザーをログアウトする
