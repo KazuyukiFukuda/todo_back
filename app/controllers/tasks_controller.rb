@@ -6,9 +6,12 @@ class TasksController < ApplicationController
 
             assignee_email = json_request["assignee_email"]
             subtasks = json_request["subtasks"]
-            subtasks.each do |a_subtask|
-                a_subtask.store("completed", false)
+            if !subtasks.nil?
+                subtasks.each do |a_subtask|
+                    a_subtask.store("completed", false)
+                end
             end
+
             task_hash = json_request.without("assignee_email", "subtasks")
             task_hash.store("completed", false)
             assignee_user = User.find_by(email: assignee_email)
@@ -18,7 +21,7 @@ class TasksController < ApplicationController
             else
                 task_hash.store("assignee_id", assignee_user.id) if !assignee_user.nil?
                 tasks = @user.owned_tasks.create(task_hash)
-                tasks.subtasks.create(subtasks)
+                tasks.subtasks.create(subtasks) if !subtasks.nil?
                 render json: {message: "created the task successfully"}, status:200
             end
         else
@@ -27,6 +30,42 @@ class TasksController < ApplicationController
     end
 
     def index
-        render json: {message: "hoge"}, status: 400
+        if logged_in?
+            user =  current_user
+            user_task = user.owned_tasks.select(:id, :name, :user_id, :assignee_id, :public, :completed, :deadline)
+            user_task += user.assigned_tasks.select(:id, :name, :user_id, :assignee_id, :public, :completed, :deadline)
+            return_list = []
+
+            user_task.each do |a_task|
+                #getting information
+                a_task_hash = a_task.attributes
+
+                create_user_name = User.find(a_task_hash["user_id"]).display_name
+                if !a_task_hash["assignee_id"].nil?
+                    assignee_user_model = User.find(a_task_hash["assignee_id"])
+                    assignee_user_name = assignee_user_model.nil? ? "" : assignee_user_model.display_name
+                else
+                    assignee_user_name = ""
+                end
+
+                adding_hash = {
+                    task_id: a_task_hash["id"],
+                    create_user: create_user_name,
+                    assignee_user: assignee_user_name,
+                    total_subtask_amount: a_task.subtasks.count,
+                    finished_subtask_amount: a_task.subtasks.where(completed: true).count,
+                }
+
+                #delete params
+                a_task_hash = a_task_hash.without("id", "user_id", "assignee_id")
+                a_task_hash.merge!(adding_hash)
+
+                return_list.push(a_task_hash)
+            end
+
+            render json: {message: return_list}, status: 200
+        else
+            render json: {message: "hoge"}, status: 401
+        end
     end
 end

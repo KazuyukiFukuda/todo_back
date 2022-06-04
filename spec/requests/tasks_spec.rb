@@ -30,6 +30,11 @@ RSpec.describe "Tasks", type: :request do
         expect(response).to have_http_status(200)
       end
 
+      it "posts successfuly without subtask" do
+        @params[:subtasks] = nil
+        post tasks_path, :params => @params.to_json, headers: {"Content-Type" => "application/json"}
+      end
+
       it "saves task in db" do
         expect{
           post tasks_path, :params => @params.to_json, headers: {"Content-Type" => "application/json"}
@@ -55,20 +60,38 @@ RSpec.describe "Tasks", type: :request do
   
   describe "GET /tasks" do
     context "success" do
-      before do
-        @user = FactoryBot.create(:user)
-        sign_in_as(@user.email, @user.password)
+      user = FactoryBot.create(:user_with_tasks)
+
+      before(:each) do
+        sign_in_as(user.email, user.password)
         get tasks_path
       end
 
+      it "returns 200 status" do
+        expect(response).to have_http_status(200)
+        #expect(JSON.parse(response.body)["message"]).to eq(user.id)
+      end
+
       it "returns all task" do
-        expect(JSON.load(response.body).length).to eq(@user.owned_tasks.count + @user.assigned_tasks.count)
+        hoge = JSON.parse(response.body)["message"]
+
+        expect(hoge.length).to eq(user.owned_tasks.count + user.assigned_tasks.count)
       end
 
       it "returns correct params" do
-        returned_params = JSON.load(response.body)[0]
-        correct_params = @user.attributes
-        expect(returned_params).to include(correct_params)
+        returned_params = JSON.parse(response.body)["message"][0].keys
+        correct_params = [
+          "name",
+          "public",
+          "completed",
+          "deadline",
+          "task_id",
+          "create_user",
+          "assignee_user",
+          "total_subtask_amount",
+          "finished_subtask_amount",
+        ]
+        expect(returned_params - correct_params).to eq []
       end
     end
     context "failed " do
