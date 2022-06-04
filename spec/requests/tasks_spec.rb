@@ -51,4 +51,32 @@ RSpec.describe "Tasks", type: :request do
       end
     end
   end
+
+  
+  describe "GET /tasks" do
+    context "success" do
+      before do
+        @user = FactoryBot.create(:user)
+        sign_in_as(@user.email, @user.password)
+        get tasks_path
+      end
+
+      it "returns all task" do
+        expect(JSON.load(response.body).length).to eq(@user.owned_tasks.count + @user.assigned_tasks.count)
+      end
+
+      it "returns correct params" do
+        returned_params = JSON.load(response.body)[0]
+        correct_params = @user.attributes
+        expect(returned_params).to include(correct_params)
+      end
+    end
+    context "failed " do
+      it "failed without login" do
+        get tasks_path
+        expect(response).to have_http_status(401)
+      end
+    end
+    
+  end
 end
