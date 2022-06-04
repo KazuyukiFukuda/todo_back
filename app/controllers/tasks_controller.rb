@@ -70,6 +70,38 @@ class TasksController < ApplicationController
     end
 
     def show
-        render json: {message: "hoge"}, status: 200
+        if logged_in?
+            user = current_user
+            task_id = params[:id]
+
+            if Task.where(id: task_id).exists?
+                task = Task.find(task_id)
+            else
+                render json: {message: "そのタスクは存在しません"}, status: 404
+                return
+            end
+
+            if !(task.user_id == user.id || task.assignee_id == user.id)
+                render json: {message: "このタスクへの閲覧権限がありません"}, status: 401
+                return
+            end
+
+            task_hash = task.attributes
+            return_hash = task_hash.without("id", "completed", "user_id", "created_at", "updated_at")
+
+            return_subtasks = []
+            subtasks = task.subtasks
+            subtasks.each do |a_subtask|
+                subtask_hash = a_subtask.attributes
+                return_subtasks.push(subtask_hash.without("task_id", "created_at", "updated_at"))
+            end
+
+            return_hash.store("subtasks", return_subtasks)
+
+            render json: {message: return_hash}, status: 200
+
+        else
+            render json: {message: "loginされていません"}, status: 401
+        end
     end
 end

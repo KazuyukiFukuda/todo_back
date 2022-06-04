@@ -57,7 +57,6 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
-  
   describe "GET /tasks" do
     context "success" do
       user = FactoryBot.create(:user_with_tasks)
@@ -100,10 +99,9 @@ RSpec.describe "Tasks", type: :request do
         expect(response).to have_http_status(401)
       end
     end
-    
   end
 
-  describe "GET /task/:id"
+  describe "GET /task/:id" do
     user = FactoryBot.create(:user_with_tasks_subtask)
     task = user.owned_tasks[0]
 
@@ -119,16 +117,21 @@ RSpec.describe "Tasks", type: :request do
 
       it "returns the correct subtasks" do
         returned_subtasks = JSON.parse(response.body)["message"]["subtasks"]
-        correct_subtasks = task.subtasks
+        correct_subtasks = []
+        task.subtasks.each do |a_subtask|
+          subtask_hash = a_subtask.attributes
+          correct_subtasks.push(subtask_hash.without("task_id", "created_at", "updated_at"))
+        end
 
-        duplicate_subtasks = returned_subtasks & correct_subtasks
-        expect(duplicate_subtasks.length).to eq(correct_subtasks.length)
+        #duplicate_subtasks = returned_subtasks & correct_subtasks
+        expect(returned_subtasks).to eq(correct_subtasks)
 
       end
 
       it "returns correct params" do
-        returned_params = JSON.parse(response.body)["message"][0].without("subtasks")
-        correct_params = task.attributes.without(:id, :completed, :user_id, :created_at, :updated_at)
+        returned_params = JSON.parse(response.body)["message"].without("subtasks")
+        task_params = task.attributes
+        correct_params = task_params.without("id", "completed", "user_id", "created_at", "updated_at")
         expect(returned_params).to eq(correct_params)
       end
     end
@@ -139,12 +142,22 @@ RSpec.describe "Tasks", type: :request do
         expect(response).to have_http_status(401)
       end
 
+      it "can't get if user doesn't have any authority" do
+        other_user = FactoryBot.create(:user_with_tasks)
+        other_user_task = other_user.owned_tasks[0]
+
+        sign_in_as(user.email, user.password)
+        get task_path(other_user_task.id)
+
+        expect(response.body).to include("このタスクへの閲覧権限がありません")
+      end
+
       it "returns 404 status when getting task that doesn't exist" do
         sign_in_as(user.email, user.password)
         get task_path(Task.count+1)
+        
         expect(response).to have_http_status(404)
       end
     end
-    
-    
+  end
 end
