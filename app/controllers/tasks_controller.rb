@@ -2,23 +2,25 @@ class TasksController < ApplicationController
     def create
         if logged_in?
             json_request = JSON.parse(request.body.read)
-            #assignee_email = json_request["assignee_email"]
-            #@assignee_user = User.find_by(email: assignee_email)
             @user =  current_user
 
-            #reject
-            task_hash_rejected = json_request.reject {|key| key=="assignee_email"}
-            #add
-            #task_hash = task_hash_rejected.store("assignee_id", @assignee_user.id)
+            assignee_email = json_request["assignee_email"]
+            subtasks = json_request["subtasks"]
+            subtasks.each do |a_subtask|
+                a_subtask.store("completed", false)
+            end
+            task_hash = json_request.without("assignee_email", "subtasks")
+            task_hash.store("completed", false)
+            assignee_user = User.find_by(email: assignee_email)
 
-            params = {tasks:{
-                tasks_attributes: [task_hash_rejected]
-            }}
-
-            @user.attributes = params[:tasks]
-            @user.tasks.save
-
-            render json: {message: params}, status:200
+            if assignee_user.nil? && !assignee_email.nil?
+                render json: {message: "emailに該当するユーザーが存在しません"}, status:(400)
+            else
+                task_hash.store("assignee_id", assignee_user.id) if !assignee_user.nil?
+                tasks = @user.owned_tasks.create(task_hash)
+                tasks.subtasks.create(subtasks)
+                render json: {message: "created the task successfully"}, status:200
+            end
         else
             render json: {message: "loginされていません"}, status: 400
         end
