@@ -68,4 +68,8 @@ class TasksController < ApplicationController
             render json: {message: "hoge"}, status: 401
         end
     end
+
+    def show
+        render json: {message: "hoge"}, status: 200
+    end
 end

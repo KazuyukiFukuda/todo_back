@@ -14,12 +14,23 @@ FactoryBot.define do
 
     factory :user_with_tasks do
       transient do
-        stories_count {3}
+        task_count {3}
       end
 
       after(:create) do |user, evaluator|
-        create_list(:task, evaluator.stories_count, user_id: user.id, assignee_id: nil)
+        create_list(:task, evaluator.task_count, user_id: user.id, assignee_id: nil)
       end
     end
+
+    factory :user_with_tasks_subtask do
+      transient do
+        task_count {3}
+      end
+
+      after(:create) do |user, evaluator|
+        create_list(:task_with_subtasks, evaluator.task_count, user_id: user.id, assignee_id: nil)
+      end
+    end
+
   end
 end

@@ -102,4 +102,49 @@ RSpec.describe "Tasks", type: :request do
     end
     
   end
+
+  describe "GET /task/:id"
+    user = FactoryBot.create(:user_with_tasks_subtask)
+    task = user.owned_tasks[0]
+
+    context "success" do
+      before(:each) do
+        sign_in_as(user.email, user.password)
+        get task_path(task.id)
+      end
+
+      it "returns 200 status" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns the correct subtasks" do
+        returned_subtasks = JSON.parse(response.body)["message"]["subtasks"]
+        correct_subtasks = task.subtasks
+
+        duplicate_subtasks = returned_subtasks & correct_subtasks
+        expect(duplicate_subtasks.length).to eq(correct_subtasks.length)
+
+      end
+
+      it "returns correct params" do
+        returned_params = JSON.parse(response.body)["message"][0].without("subtasks")
+        correct_params = task.attributes.without(:id, :completed, :user_id, :created_at, :updated_at)
+        expect(returned_params).to eq(correct_params)
+      end
+    end
+
+    context "failed" do
+      it "failed withou without login" do
+        get task_path(task.id)
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns 404 status when getting task that doesn't exist" do
+        sign_in_as(user.email, user.password)
+        get task_path(Task.count+1)
+        expect(response).to have_http_status(404)
+      end
+    end
+    
+    
 end
