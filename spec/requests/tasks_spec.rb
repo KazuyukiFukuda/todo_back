@@ -132,6 +132,9 @@ RSpec.describe "Tasks", type: :request do
         returned_params = JSON.parse(response.body)["message"].without("subtasks")
         task_params = task.attributes
         correct_params = task_params.without("id", "completed", "user_id", "created_at", "updated_at")
+        date = correct_params["deadline"].strftime("%Y-%m-%d")
+        correct_params["deadline"] = date
+
         expect(returned_params).to eq(correct_params)
       end
     end
@@ -154,7 +157,7 @@ RSpec.describe "Tasks", type: :request do
 
       it "returns 404 status when getting task that doesn't exist" do
         sign_in_as(user.email, user.password)
-        get task_path(Task.count+1)
+        get task_path(Task.count+99999)
         
         expect(response).to have_http_status(404)
       end
@@ -164,7 +167,7 @@ RSpec.describe "Tasks", type: :request do
   describe "PATCH /task/:id" do
     user = FactoryBot.create(:user_with_tasks_subtask)
     task = user.owned_tasks[0]
-    let(:task_params) {{
+    new_task_params =  {
       completed: false,
       name: "新しいタスク",
       description: "#{Faker::Beer.style}を調べる",
@@ -178,30 +181,31 @@ RSpec.describe "Tasks", type: :request do
           completed: true
         }
       ]
-    }}
+    }
 
     context "success" do
       before(:all) do
         sign_in_as(user.email, user.password)
-        new_task_params = task_params
         patch task_path(task.id), :params => new_task_params.to_json, headers: {"Content-Type" => "application/json"}
 
-        updated_task = user.owned_tasks.find(task.id)
-        updated_task_hash = updated_task.attributes
+        @updated_task = user.owned_tasks.find(task.id)
+        @updated_task_hash = @updated_task.attributes
       end
 
       it "updates a task successfully" do
-        expect(updated_task_hash).to include(new_task_params.without(:subtask))
+        #@updated_task_hash.symbolize_keys
+        updated_task_hash2 = @updated_task_hash.without("id","user_id","created_at", "subtasks", "created_at", "updated_at")
+        date = updated_task_hash2["deadline"].strftime("%Y-%m-%d")
+        updated_task_hash2["deadline"] = date
+
+        expect(updated_task_hash2.symbolize_keys).to eq(new_task_params.without(:subtasks))
       end
 
       it "updates subtasks successfuly" do
-        updated_subtasks = []
-        updated_task.subtasks.each do |a_subtask|
-          subtask_hash = a_subtask.attributes
-          updated_subtasks.push(subtask_hash.without("task_id", "created_at", "updated_at"))
-        end
+        updated_subtask = @updated_task.subtasks.find(task.subtasks[0].id).attributes.symbolize_keys
+        updated_subtask = updated_subtask.without(:task_id)
 
-        expect(updated_subtasks).to eq(new_task_params[:subtasks])
+        expect(updated_subtask).to include(new_task_params[:subtasks][0])
       end
     end
 
@@ -223,7 +227,7 @@ RSpec.describe "Tasks", type: :request do
 
       it "returns 404 status when updating task doesn't exist" do
         sign_in_as(user.email, user.password)
-        patch task_path(Task.count+1), :params => :new_task_params.to_json, headers: {"Content-Type" => "application/json"}
+        patch task_path(Task.count+99999), :params => :new_task_params.to_json, headers: {"Content-Type" => "application/json"}
 
         expect(response).to have_http_status(404)
       end

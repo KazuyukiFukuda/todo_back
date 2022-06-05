@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :task do
     sequence(:name) { |n| "MyString #{n}" }
     description { "MyText" }
-    deadline { 1.week.from_now.strftime('%Y-%M-%D') }
+    deadline { 1.week.from_now.strftime('%Y-%m-%d') }
     completed { false }
     public { false }
     association :user
