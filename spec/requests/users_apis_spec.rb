@@ -43,7 +43,7 @@ RSpec.describe "UsersApis", type: :request do
     context "sucess" do
       before do
         sign_in_as(user.email, user.password)
-        get "/users"
+        get users_path
       end
 
       it "returns 200 status" do
@@ -64,7 +64,7 @@ RSpec.describe "UsersApis", type: :request do
 
     context "fail" do
       it "can't get without login" do
-        get "/users"
+        get users_path
         expect(response).to have_http_status(401)
       end
     end
@@ -72,55 +72,65 @@ RSpec.describe "UsersApis", type: :request do
 
 
   describe "PATCH /users:id" do
-    before do
-      @user = FactoryBot.create(:user)
-      sign_in_as(@user.email, @user.password)
-    end
-
     context "success" do
+      let(:user) {FactoryBot.create(:user)}
+      let(:update_email) {{
+        display_name: nil,
+        email: Faker::Internet.email,
+        old_password: nil,
+        password: nil,
+        password_confirmation: nil,
+      }}
+      let(:update_password) {{
+        display_name: nil,
+        email: nil,
+        old_password: user.password,
+        password: "AAAbbb111",
+        password_confirmation: "AAAbbb111",
+      }}
+
       before do
-        @update_user = {
-          email: Faker::Internet.email,
-          #email: "kazu@test.com",
-        }
-        patch user_path(@user), params: {email: Faker::Internet.email}.to_json, headers: {"Content-Type" => "application/json"}
+        sign_in_as(user.email, user.password)
       end
 
-      it "returns 200 status" do
-        #expect(response).to have_http_status(200)
-        expect( response.body ).to include(@user[:email])
+      it "update successfully" do
+        patch user_path(user.id), :params =>update_email.to_json, headers: {"Content-Type" => "application/json"}
+        expect(user.attributes["email"]).to eq(update_email[:email])
       end
 
       it "doesn't update others" do
-        updated_user = User.find_by(id: @user.id)
-        updated_user_hash = updated_user.attributes
-        user_hash = @user.attributes.slice(:display_name, :password)
-        expect(updated_user_hash).to include(user_hash)
+        expect{
+          patch user_path(user.id), :params =>update_email.to_json, headers: {"Content-Type" => "application/json"}
+        }.to change{ user.attributes.without["email"] }
+      end
+
+      it "update password successfully" do
+        patch user_path(user.id), :params =>update_password.to_json, headers: {"Content-Type" => "application/json"}
+        expect(user.password).to eq(update_password[:password])
       end
     end
 
     context "failed" do
-    
+      let (:user) {FactoryBot.create(:user)}
+      let(:update_with_wrong_old_password) {{
+        display_name: nil,
+        email: nil,
+        old_password: "BB#{user.password}AA",
+        password: "AAAbbb111",
+        password_confirmation: "AAAbbb111",
+      }}
+
       it "doesn't update password if old_password is wrong" do
-        user_here = FactoryBot.create(:user)
-  
-        update_user = {
-          display_name: nil,
-          email: nil,
-          old_password: "agRHASWERTY23345",
-          password: "ETYserSRT2345",
-          password_confirmation: "ETYserSRT2345",
-        }
-  
-        patch user_path(user_here), :params => update_user.to_json, headers: {"Content-Type" => "application/json"}
+        sign_in_as(user.email, user.password)
+        patch user_path(user.id), :params => update_with_wrong_old_password.to_json, headers: {"Content-Type" => "application/json"}
         expect(response).to have_http_status(400)
       end
-  
+
       it "doesn't update if user doesn't have authorization" do
+        sign_in_as(user.email, user.password)
         other_user = FactoryBot.create(:user)
-        user_here2 = FactoryBot.create(:user)
-        patch user_path(other_user), :params => user_here2.attributes.to_json, headers: {"Content-Type" => "application/json"}
-  
+        patch user_path(other_user.id), :params => update_with_wrong_old_password.to_json, headers: {"Content-Type" => "application/json"}
+
         expect(response).to have_http_status(401)
       end
     end

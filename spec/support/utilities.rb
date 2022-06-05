@@ -8,7 +8,7 @@ def sign_in_as(email, password)
 end
 
 def sign_up(user)
-    post "/users",  params: {
+    post users_path,  params: {
         display_name: user.display_name,
         email: user.email,
         password: user.password,
