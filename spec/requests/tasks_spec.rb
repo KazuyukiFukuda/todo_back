@@ -24,7 +24,7 @@ RSpec.describe "Tasks", type: :request do
         expect(response).to have_http_status(200)
       end
 
-      it "post successfuly withou assignee_email" do
+      it "post successfuly without assignee_email" do
         @params[:assignee_email] = nil
         post tasks_path, :params => @params.to_json, headers: {"Content-Type" => "application/json"}
         expect(response).to have_http_status(200)
@@ -228,6 +228,60 @@ RSpec.describe "Tasks", type: :request do
       it "returns 404 status when updating task doesn't exist" do
         sign_in_as(user.email, user.password)
         patch task_path(Task.count+99999), :params => :new_task_params.to_json, headers: {"Content-Type" => "application/json"}
+
+        expect(response).to have_http_status(404)
+      end
+    end
+  end
+
+  describe "DELETE /task/:id" do
+    context "success" do
+      let(:user) {
+        FactoryBot.create(:user_with_tasks_subtask)
+      }
+      let(:delete_task) {user.owned_tasks[0]}
+      let(:undelete_task) {user.owned_tasks[1..]}
+
+      before do
+        sign_in_as(user.email, user.password)
+      end
+
+      it "delete task successuly" do
+        expect{
+          delete task_path(delete_task.id)
+        }.to change(user.owned_tasks, :count).by(-1)
+
+        expect(user.owned_tasks).to eq(undelete_task)
+      end
+
+      it "delete subtasks that belong the task" do
+        expect{
+          delete task_path(delete_task.id)
+        }.to change(Subtask, :count).by( -(delete_task.subtasks.count))
+      end
+    end
+
+    context "failed" do
+      let(:user) {FactoryBot.create(:user_with_tasks_subtask)}
+      let(:task) {user.owned_tasks[0]}
+
+      it "failed without login" do
+        delete task_path(task.id)
+        expect(response).to have_http_status(401)
+      end
+
+      it "can't update if user doesm't have any authority" do
+        other_user = FactoryBot.create(:user_with_tasks)
+        other_user_task = other_user.owned_tasks[0]
+
+        sign_in_as(user.email, user.password)
+        delete task_path(task.id)
+        expect(response.body).to include("このタスクへの閲覧権限がありません")
+      end
+
+      it "returns 404 status when updating task doesn't exist" do
+        sign_in_as(user.email, user.password)
+        delete task_path(task.id+9999)
 
         expect(response).to have_http_status(404)
       end

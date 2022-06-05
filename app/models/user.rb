@@ -1,7 +1,7 @@
 class User < ApplicationRecord
     has_many :owned_tasks,      class_name: "Task"
     has_many :assigned_tasks,   class_name: "Task"
-    accepts_nested_attributes_for :owned_tasks, :assigned_tasks
+    accepts_nested_attributes_for :owned_tasks, :assigned_tasks, allow_destroy: true
     
     before_save {self.email = email.downcase}
     VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
