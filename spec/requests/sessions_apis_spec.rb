@@ -9,7 +9,7 @@ RSpec.describe "Sessions", type: :request do
         sign_in_as(user.email, user.password)
         expect(response).to have_http_status(201)
         expect(response.body).to include(user.display_name)
-        expect(session[:session_id]).to_not eq(nil)
+        expect(session[:user_id]).to_not eq(nil)
       end
     end
 
@@ -18,7 +18,7 @@ RSpec.describe "Sessions", type: :request do
       after do
         expect(response).to have_http_status(400)
         expect(response.body).to include("emailまたはpasswordが間違っています")
-        expect(session[:session_id]).to eq(nil)
+        expect(session[:user_id]).to eq(nil)
       end
 
       it "returns error message without email" do
@@ -45,13 +45,13 @@ RSpec.describe "Sessions", type: :request do
 
       delete  '/auth'
       expect(response).to have_http_status(204)
-      expect(session[:session_id]).to eq("")
+      expect(session[:user_id]).to eq(nil)
     end
 
     it "doesn't logout when not login" do
       delete  '/auth'
-      error_session_id = Digest::MD5.hexdigest("4")
-      session[:session_id] = ""
+      error_user_id = Digest::MD5.hexdigest("4")
+      session[:user_id] = ""
       expect(response).to have_http_status(401)
     end
   end
