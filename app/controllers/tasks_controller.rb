@@ -104,4 +104,8 @@ class TasksController < ApplicationController
             render json: {message: "loginされていません"}, status: 401
         end
     end
+
+    def update
+        render json: {message: "hoge"}, status: 200
+    end
 end
