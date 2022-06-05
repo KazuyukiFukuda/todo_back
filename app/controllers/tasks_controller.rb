@@ -139,6 +139,28 @@ class TasksController < ApplicationController
     end
 
     def destroy
-        render json: {message: "hoge"}, status: 200
+        if logged_in?
+            user = current_user
+            task_id = params[:id]
+
+            if Task.where(id: task_id).exists?
+                task = Task.find(task_id)
+            else
+                render json: {message: "このタスクは存在しません"}, status: 404
+                return
+            end
+
+            if !(task.user_id == user.id || task.assignee_id == user.id)
+                render json: {message: "このタスクへの閲覧権限がありません"}, status: 401
+                return
+            end
+
+            task.subtasks.destroy_all
+            Task.destroy(task_id)
+
+            render json: {message: "hoge"}, status: 200
+        else
+            render json: {message: "loginされていません"}, status: 401
+        end
     end
 end

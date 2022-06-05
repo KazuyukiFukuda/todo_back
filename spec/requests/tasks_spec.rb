@@ -240,7 +240,7 @@ RSpec.describe "Tasks", type: :request do
         FactoryBot.create(:user_with_tasks_subtask)
       }
       let(:delete_task) {user.owned_tasks[0]}
-      let(:undelete_task) {user.owned_tasks[1..]}
+      let(:undelete_task) {user.owned_tasks}
 
       before do
         sign_in_as(user.email, user.password)
@@ -275,13 +275,13 @@ RSpec.describe "Tasks", type: :request do
         other_user_task = other_user.owned_tasks[0]
 
         sign_in_as(user.email, user.password)
-        delete task_path(task.id)
+        delete task_path(other_user_task.id)
         expect(response.body).to include("このタスクへの閲覧権限がありません")
       end
 
       it "returns 404 status when updating task doesn't exist" do
         sign_in_as(user.email, user.password)
-        delete task_path(task.id+9999)
+        delete task_path((task.id)+9999)
 
         expect(response).to have_http_status(404)
       end
