@@ -8,7 +8,7 @@ RSpec.describe "Sessions", type: :request do
       it "returns http success " do
         sign_in_as(user.email, user.password)
         expect(response).to have_http_status(201)
-        expect(response.body).to include(user.display_name)
+        expect(response.body).to include(user.display_name, user.id.to_s())
         expect(session[:user_id]).to_not eq(nil)
       end
     end
