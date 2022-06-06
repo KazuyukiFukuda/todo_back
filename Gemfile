@@ -50,6 +50,7 @@ gem "bootsnap", require: false
 
 gem 'bcrypt', '3.1.13'
 gem 'activerecord-import'
+gem 'rack-cors'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
