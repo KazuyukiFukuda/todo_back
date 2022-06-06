@@ -5,7 +5,7 @@ class UsersController < ApplicationController
         if user.valid?
             user.save
             session[:user_id] = user.id
-            render json: {display_name: user.display_name}, status: 201
+            render json: {id:user.id, display_name: user.display_name}, status: 201
         else
             render json: { message:"failed to signup"}, status: 400
 

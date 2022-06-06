@@ -9,7 +9,7 @@ RSpec.describe "UsersApis", type: :request do
       it "returns sucsess with display name and email, password, password_confirmation" do
         sign_up(user)
         expect(response).to have_http_status(201)
-        expect(response.body).to include(user.display_name)
+        expect(response.body).to include(user.display_name, user.id.to_s())
         expect(session[:user_id]).to_not eq(nil)
       end
 
