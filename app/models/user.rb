@@ -1,6 +1,6 @@
 class User < ApplicationRecord
-    has_many :owned_tasks,      class_name: "Task"
-    has_many :assigned_tasks,   class_name: "Task"
+    has_many :owned_tasks,      class_name: "Task", foreign_key: "user_id"
+    has_many :assigned_tasks,   class_name: "Task", foreign_key: "assignee_id"
     accepts_nested_attributes_for :owned_tasks, :assigned_tasks, allow_destroy: true
     
     before_save {self.email = email.downcase}
