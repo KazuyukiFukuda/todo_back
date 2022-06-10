@@ -19,7 +19,7 @@ class UsersController < ApplicationController
             list.each do |v|
                 all_users.push( {:id => v.id, email: v.email, display_name: v.display_name} )
             end
-            render json: all_users, status: 200
+            render json: {message: all_users}, status: 200
         else
            render json: {message: "loginされていません"}, status: 401
         end
@@ -47,7 +47,7 @@ class UsersController < ApplicationController
                 render json: {message: "パスワードが間違っています"}, status:400
                 return
             end
-
+            
             if json_request["password"] != json_request["password_confirmation"]
                 render json: {message: "新たなパスワードと確認用パスワードが異なっています"}, status:400
                 return

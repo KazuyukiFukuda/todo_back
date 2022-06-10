@@ -18,7 +18,7 @@ class ApplicationController < ActionController::API
 
     # 現在のユーザーをログアウトする
     def log_out
-        #session[:user_id].clear
+        cookies.delete :_session_id
         session.delete(:user_id)
         @current_user = nil
     end

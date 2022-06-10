@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  include ActionController::Cookies
   def create
     user = User.find_by(email: params[:session][:email].downcase)
     if user && user.authenticate(params[:session][:password])
@@ -14,6 +15,7 @@ class SessionsController < ApplicationController
       log_out
       render json: {message: "logout successfuly"}, status: 204
     else
+      cookies.delete :_session_id
       render json: {message: "loginされていません"}, status: 401
     end
   end

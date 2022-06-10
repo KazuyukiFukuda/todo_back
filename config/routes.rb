@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-
+  #Get me
+  get     '/me',      to: 'mes#index'
 
   #Auth endpoint
   post    '/auth',    to: 'sessions#create'
@@ -16,5 +17,7 @@ Rails.application.routes.draw do
 
   #patch "/users/:id",  to: "users#update"
   resources :users
+
+  
 
 end

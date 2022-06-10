@@ -87,7 +87,7 @@ class TasksController < ApplicationController
             end
 
             task_hash = task.attributes
-            return_hash = task_hash.without("id", "completed", "user_id", "created_at", "updated_at")
+            return_hash = task_hash.without("id", "user_id", "created_at", "updated_at")
 
             return_subtasks = []
             subtasks = task.subtasks
@@ -127,9 +127,11 @@ class TasksController < ApplicationController
             new_subtask = json_request["subtasks"]
 
             task.update(new_task_hash)
-            new_subtask.each do |a_new_subtask|
-                a_subtask = Subtask.find(a_new_subtask["id"])
-                a_subtask.update(a_new_subtask.without("id"))
+            if new_subtask!=nil
+                new_subtask.each do |a_new_subtask|
+                    a_subtask = Subtask.find(a_new_subtask["id"])
+                    a_subtask.update(a_new_subtask.without("id"))
+                end
             end
 
             render json: {message: new_subtask}, status: 200
